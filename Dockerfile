@@ -29,12 +29,16 @@ COPY package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
 # Copy necessary files from builder
+# Copy necessary files from builder
 COPY --from=builder /usr/src/app/config ./config
 COPY --from=builder /usr/src/app/controllers ./controllers
 COPY --from=builder /usr/src/app/middleware ./middleware
 COPY --from=builder /usr/src/app/models ./models
 COPY --from=builder /usr/src/app/routes ./routes
 COPY --from=builder /usr/src/app/services ./services
+COPY --from=builder /usr/src/app/templates ./templates
+COPY --from=builder /usr/src/app/utils ./utils
+COPY --from=builder /usr/src/app/validations ./validations
 COPY --from=builder /usr/src/app/server.js ./server.js
 
 # Change ownership to node user for security
