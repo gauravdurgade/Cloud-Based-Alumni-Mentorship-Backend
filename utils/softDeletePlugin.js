@@ -1,29 +1,39 @@
 /**
  * Mongoose plugin to automatically filter out soft-deleted documents.
  * Adds `isDeleted` and `deletedAt` fields to the schema.
- * Automatically excludes `isDeleted: true` from `find`, `findOne`, `countDocuments`, etc.
+ * Automatically excludes `isDeleted: true` from queries.
  */
+
 module.exports = function softDeletePlugin(schema) {
     schema.add({
         isDeleted: {
             type: Boolean,
-            default: false
+            default: false,
         },
         deletedAt: {
             type: Date,
-            default: null
-        }
+            default: null,
+        },
     });
 
-    const types = ['find', 'findOne', 'countDocuments', 'findOneAndUpdate', 'updateMany'];
+    const queryTypes = [
+        "find",
+        "findOne",
+        "countDocuments",
+        "findOneAndUpdate",
+        "updateMany",
+    ];
 
-    types.forEach(type => {
-        schema.pre(type, function (next) {
-            // Only apply if the query hasn't explicitly requested deleted docs
-            if (this.getFilter().isDeleted !== true && this.getFilter().isDeleted !== false) {
+    queryTypes.forEach((type) => {
+        schema.pre(type, function () {
+            const filter = this.getFilter();
+
+            if (
+                filter.isDeleted !== true &&
+                filter.isDeleted !== false
+            ) {
                 this.where({ isDeleted: { $ne: true } });
             }
-            next();
         });
     });
 };

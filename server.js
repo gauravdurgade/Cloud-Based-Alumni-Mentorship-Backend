@@ -35,6 +35,7 @@ const swaggerUi = require("swagger-ui-express");
 const swaggerSpec = require("./config/swagger");
 
 const app = express();
+console.log(">>>>>>>> THIS IS MY SERVER <<<<<<<<");
 connectDB();
 
 // Trust reverse proxy (for Docker/Nginx/Heroku rate limiting)
