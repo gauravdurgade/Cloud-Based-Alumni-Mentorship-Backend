@@ -75,7 +75,7 @@ docker compose down
 ## Health Check
 You can verify the runtime, database connection, and current environment context via the Docker-ready health endpoint:
 ```bash
-curl http://localhost:5000/health
+curl http://https://cloud-based-alumni-mentorship-backend.onrender.com/health
 ```
 
 ## API Documentation
@@ -83,8 +83,8 @@ curl http://localhost:5000/health
 This project features a fully interactive OpenAPI/Swagger playground.
 Once the server is running, you can explore, authenticate, and test all API endpoints natively in your browser:
 
-- **Swagger UI:** `http://localhost:5000/api/docs`
-- **Raw JSON Spec:** `http://localhost:5000/api/docs.json`
+- **Swagger UI:** `https://cloud-based-alumni-mentorship-backend.onrender.com/api/docs`
+- **Raw JSON Spec:** `https://cloud-based-alumni-mentorship-backend.onrender.com/api/docs.json`
 
 You can authenticate directly within the Swagger UI by clicking the "Authorize" button and pasting a valid JWT Bearer token obtained from the `/api/auth/login` endpoint.
 
