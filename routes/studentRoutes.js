@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const validate = require("../middleware/validate");
+const studentValidation = require("../validations/student.validation");
 
 /**
  * @swagger
@@ -10,7 +12,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/student/profile:
+ * /api/v1/student/profile:
  *   get:
  *     summary: Get logged in student profile
  *     tags: [Student]
@@ -44,7 +46,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/student/profile-image:
+ * /api/v1/student/profile-image:
  *   patch:
  *     summary: Upload profile image
  *     tags: [Student]
@@ -67,7 +69,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/student/resume:
+ * /api/v1/student/resume:
  *   patch:
  *     summary: Upload resume (PDF)
  *     tags: [Student]
@@ -102,7 +104,7 @@ router.use(protect);
 router.use(authorize("student"));
 
 router.get("/profile", getStudentProfile);
-router.put("/profile", updateStudentProfile);
+router.put("/profile", validate(studentValidation.updateProfile), updateStudentProfile);
 
 // File uploads using multer memory storage
 router.patch("/profile-image", uploadImage.single("file"), updateStudentProfileImage);

@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const validate = require("../middleware/validate");
+const adminValidation = require("../validations/admin.validation");
 
 /**
  * @swagger
@@ -10,7 +12,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/admin/users:
+ * /api/v1/admin/users:
  *   get:
  *     summary: Get all users
  *     tags: [Admin]
@@ -23,7 +25,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/admin/users/{id}/status:
+ * /api/v1/admin/users/{id}/status:
  *   patch:
  *     summary: Update user status or approve alumni
  *     tags: [Admin]
@@ -73,10 +75,10 @@ router.get("/dashboard", getAdminDashboard);
 router.get("/reports", getSystemReports);
 
 // User Management
-router.get("/users", getAllUsers);
-router.get("/users/:id", getUserById);
-router.patch("/users/:id", updateUser);
-router.patch("/users/:id/status", updateUserStatus);
-router.delete("/users/:id", deleteUser);
+router.get("/users", validate(adminValidation.getAllUsers), getAllUsers);
+router.get("/users/:id", validate(adminValidation.getById), getUserById);
+router.patch("/users/:id", validate(adminValidation.updateUser), updateUser);
+router.patch("/users/:id/status", validate(adminValidation.updateStatus), updateUserStatus);
+router.delete("/users/:id", validate(adminValidation.deleteUser), deleteUser);
 
 module.exports = router;

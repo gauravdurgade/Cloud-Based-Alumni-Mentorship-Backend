@@ -1,16 +1,18 @@
 const express = require("express");
 const router = express.Router();
+const validate = require("../middleware/validate");
+const authValidation = require("../validations/auth.validation");
 
 /**
  * @swagger
  * tags:
  *   name: Authentication
- *   description: User registration and login
+ *   description: User authentication and management
  */
 
 /**
  * @swagger
- * /api/auth/register:
+ * /api/v1/auth/register:
  *   post:
  *     summary: Register a new user
  *     tags: [Authentication]
@@ -24,7 +26,6 @@ const router = express.Router();
  *               - name
  *               - email
  *               - password
- *               - role
  *             properties:
  *               name:
  *                 type: string
@@ -38,19 +39,15 @@ const router = express.Router();
  *     responses:
  *       201:
  *         description: User registered successfully
- *         content:
- *           application/json:
- *             schema:
- *               $ref: '#/components/schemas/SuccessResponse'
  *       400:
- *         description: Bad request
+ *         description: Validation error
  */
 
 /**
  * @swagger
- * /api/auth/login:
+ * /api/v1/auth/login:
  *   post:
- *     summary: Log in a user
+ *     summary: Login user
  *     tags: [Authentication]
  *     requestBody:
  *       required: true
@@ -68,9 +65,22 @@ const router = express.Router();
  *                 type: string
  *     responses:
  *       200:
- *         description: User logged in successfully
+ *         description: Login successful
  *       401:
  *         description: Invalid credentials
+ */
+
+/**
+ * @swagger
+ * /api/v1/auth/profile:
+ *   get:
+ *     summary: Get current user profile
+ *     tags: [Authentication]
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: User profile data
  */
 
 const {
@@ -80,21 +90,9 @@ const {
 } = require("../controllers/authController");
 const { protect } = require("../middleware/authMiddleware");
 
-// Test Route
-router.get("/test", (req, res) => {
-    res.json({
-        success: true,
-        message: "Route is working!"
-    });
-});
-
-// Register
-router.post("/register", registerUser);
-
-// Login
-router.post("/login", loginUser);
-
-// Get Profile (Protected)
+// Routes
+router.post("/register", validate(authValidation.register), registerUser);
+router.post("/login", validate(authValidation.login), loginUser);
 router.get("/profile", protect, getProfile);
 
 module.exports = router;

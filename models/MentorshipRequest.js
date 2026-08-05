@@ -50,4 +50,12 @@ const mentorshipRequestSchema = new mongoose.Schema(
     timestamps: true
 });
 
+const softDeletePlugin = require("../utils/softDeletePlugin");
+mentorshipRequestSchema.plugin(softDeletePlugin);
+
+// Indexes for performance
+mentorshipRequestSchema.index({ student: 1 });
+mentorshipRequestSchema.index({ alumni: 1, status: 1 });
+mentorshipRequestSchema.index({ status: 1 });
+
 module.exports = mongoose.model("MentorshipRequest", mentorshipRequestSchema);

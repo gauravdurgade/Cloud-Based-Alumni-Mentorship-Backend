@@ -1,4 +1,7 @@
 const express = require("express");
+const router = express.Router();
+const validate = require("../middleware/validate");
+const alumniValidation = require("../validations/alumni.validation");
 
 /**
  * @swagger
@@ -9,7 +12,7 @@ const express = require("express");
 
 /**
  * @swagger
- * /api/alumni:
+ * /api/v1/alumni:
  *   get:
  *     summary: Discover and list approved alumni
  *     tags: [Alumni]
@@ -22,7 +25,7 @@ const express = require("express");
 
 /**
  * @swagger
- * /api/alumni/profile:
+ * /api/v1/alumni/profile:
  *   get:
  *     summary: Get logged in alumni profile
  *     tags: [Alumni]
@@ -54,7 +57,7 @@ const express = require("express");
 
 /**
  * @swagger
- * /api/alumni/profile-image:
+ * /api/v1/alumni/profile-image:
  *   patch:
  *     summary: Upload profile image
  *     tags: [Alumni]
@@ -74,7 +77,7 @@ const express = require("express");
  *       200:
  *         description: Image uploaded
  */
-const router = express.Router();
+
 const {
     getAlumniProfile,
     updateAlumniProfile,
@@ -89,16 +92,16 @@ const { uploadImage } = require("../middleware/uploadMiddleware");
 router.use(protect);
 
 // Public discovery endpoints (for all authenticated users, e.g., students & alumni)
-router.get("/", getAllAlumni);
-router.get("/search", getAllAlumni);
+router.get("/", validate(alumniValidation.getAll), getAllAlumni);
+router.get("/search", validate(alumniValidation.getAll), getAllAlumni);
 
 // Private CRUD endpoints (Alumni only)
 // Note: "/profile" must be defined before "/:id" so it doesn't match as an ID
 router.get("/profile", authorize("alumni"), getAlumniProfile);
-router.put("/profile", authorize("alumni"), updateAlumniProfile);
+router.put("/profile", authorize("alumni"), validate(alumniValidation.updateProfile), updateAlumniProfile);
 router.patch("/profile-image", authorize("alumni"), updateAlumniProfileImage);
 
 // Public discovery endpoint for specific ID
-router.get("/:id", getAlumniById);
+router.get("/:id", validate(alumniValidation.getById), getAlumniById);
 
 module.exports = router;

@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const validate = require("../middleware/validate");
+const meetingValidation = require("../validations/meeting.validation");
 
 /**
  * @swagger
@@ -10,7 +12,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/meetings:
+ * /api/v1/meetings:
  *   post:
  *     summary: Schedule a meeting
  *     tags: [Meetings]
@@ -45,7 +47,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/meetings/{id}/status:
+ * /api/v1/meetings/{id}/status:
  *   patch:
  *     summary: Update meeting status
  *     tags: [Meetings]
@@ -83,10 +85,10 @@ const { protect, authorize } = require("../middleware/authMiddleware");
 // All routes are protected
 router.use(protect);
 
-// Alumni-only routes
-router.post("/", authorize("alumni"), createMeeting);
+// Alumni routes
+router.post("/", authorize("alumni"), validate(meetingValidation.createMeeting), createMeeting);
 router.get("/alumni", authorize("alumni"), getAlumniMeetings);
-router.patch("/:id/status", authorize("alumni"), updateMeetingStatus);
+router.patch("/:id/status", authorize("alumni"), validate(meetingValidation.updateStatus), updateMeetingStatus);
 
 // Student-only routes
 router.get("/student", authorize("student"), getStudentMeetings);

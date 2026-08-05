@@ -1,4 +1,7 @@
 const express = require("express");
+const router = express.Router();
+const validate = require("../middleware/validate");
+const feedbackValidation = require("../validations/feedback.validation");
 
 /**
  * @swagger
@@ -9,7 +12,7 @@ const express = require("express");
 
 /**
  * @swagger
- * /api/feedback:
+ * /api/v1/feedback:
  *   post:
  *     summary: Submit feedback for a meeting
  *     tags: [Feedback]
@@ -42,7 +45,6 @@ const express = require("express");
  *       200:
  *         description: List of feedback
  */
-const router = express.Router();
 const {
     submitFeedback,
     getAlumniFeedback
@@ -52,10 +54,10 @@ const { protect, authorize } = require("../middleware/authMiddleware");
 // All routes are protected
 router.use(protect);
 
-// Student only: Submit feedback
-router.post("/", authorize("student"), submitFeedback);
+// Student submits feedback
+router.post("/", authorize("student"), validate(feedbackValidation.submitFeedback), submitFeedback);
 
-// Public (all authenticated users)
-router.get("/alumni/:alumniId", getAlumniFeedback);
+// Get feedback for an alumni
+router.get("/alumni/:alumniId", validate(feedbackValidation.getAlumniFeedback), getAlumniFeedback);
 
 module.exports = router;

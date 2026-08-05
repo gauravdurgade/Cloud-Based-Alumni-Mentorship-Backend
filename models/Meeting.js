@@ -47,4 +47,12 @@ const meetingSchema = new mongoose.Schema(
     timestamps: true
 });
 
+const softDeletePlugin = require("../utils/softDeletePlugin");
+meetingSchema.plugin(softDeletePlugin);
+
+// Indexes for performance
+meetingSchema.index({ student: 1 });
+meetingSchema.index({ alumni: 1, status: 1 });
+meetingSchema.index({ request: 1 });
+
 module.exports = mongoose.model("Meeting", meetingSchema);

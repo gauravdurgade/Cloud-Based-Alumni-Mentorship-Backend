@@ -1,43 +1,29 @@
 const { getStudentMetrics, getAlumniMetrics, getAdminMetrics } = require("../services/dashboardService");
+const asyncHandler = require("../middleware/asyncHandler");
 
 // @desc    Get student dashboard
-// @route   GET /api/dashboard/student
+// @route   GET /api/v1/dashboard/student
 // @access  Private (Student only)
-const getStudentDashboard = async (req, res) => {
-    try {
-        const metrics = await getStudentMetrics(req.user.id);
-        res.status(200).json({ success: true, data: metrics });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Server Error", data: null });
-    }
-};
+const getStudentDashboard = asyncHandler(async (req, res) => {
+    const metrics = await getStudentMetrics(req.user.id);
+    res.status(200).json({ success: true, message: "Dashboard metrics fetched", data: metrics });
+});
 
 // @desc    Get alumni dashboard
-// @route   GET /api/dashboard/alumni
+// @route   GET /api/v1/dashboard/alumni
 // @access  Private (Alumni only)
-const getAlumniDashboard = async (req, res) => {
-    try {
-        const metrics = await getAlumniMetrics(req.user.id);
-        res.status(200).json({ success: true, data: metrics });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Server Error", data: null });
-    }
-};
+const getAlumniDashboard = asyncHandler(async (req, res) => {
+    const metrics = await getAlumniMetrics(req.user.id);
+    res.status(200).json({ success: true, message: "Dashboard metrics fetched", data: metrics });
+});
 
 // @desc    Get admin dashboard
-// @route   GET /api/dashboard/admin
+// @route   GET /api/v1/dashboard/admin
 // @access  Private (Admin only)
-const getAdminDashboard = async (req, res) => {
-    try {
-        const metrics = await getAdminMetrics();
-        res.status(200).json({ success: true, data: metrics });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: "Server Error", data: null });
-    }
-};
+const getAdminDashboard = asyncHandler(async (req, res) => {
+    const metrics = await getAdminMetrics();
+    res.status(200).json({ success: true, message: "Dashboard metrics fetched", data: metrics });
+});
 
 module.exports = {
     getStudentDashboard,

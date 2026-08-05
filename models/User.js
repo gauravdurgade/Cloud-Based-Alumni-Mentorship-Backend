@@ -52,14 +52,15 @@ const userSchema = new mongoose.Schema(
     completedMentorships: { type: Number, default: 0 },
     recommendationPercentage: { type: Number, default: 0 },
     accountStatus: { type: String, enum: ["Active", "Suspended"], default: "Active" },
-    alumniApprovalStatus: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" },
-    isDeleted: { type: Boolean, default: false },
-    deletedAt: { type: Date }
+    alumniApprovalStatus: { type: String, enum: ["Pending", "Approved", "Rejected"], default: "Pending" }
 },
 {
     timestamps:true
 }
 );
+
+const softDeletePlugin = require("../utils/softDeletePlugin");
+userSchema.plugin(softDeletePlugin);
 
 // Indexes for Alumni Discovery optimization
 userSchema.index({ role: 1 });

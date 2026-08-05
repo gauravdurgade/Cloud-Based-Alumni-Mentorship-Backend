@@ -55,8 +55,16 @@ const notificationSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     }
-}, {
+},
+{
     timestamps: true
 });
+
+const softDeletePlugin = require("../utils/softDeletePlugin");
+notificationSchema.plugin(softDeletePlugin);
+
+// Indexes
+notificationSchema.index({ user: 1, isRead: 1 });
+notificationSchema.index({ type: 1 });
 
 module.exports = mongoose.model("Notification", notificationSchema);

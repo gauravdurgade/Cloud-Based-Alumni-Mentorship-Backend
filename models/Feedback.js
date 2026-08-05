@@ -39,4 +39,11 @@ const feedbackSchema = new mongoose.Schema({
     timestamps: true
 });
 
+const softDeletePlugin = require("../utils/softDeletePlugin");
+feedbackSchema.plugin(softDeletePlugin);
+
+// Indexes
+feedbackSchema.index({ alumni: 1 });
+feedbackSchema.index({ student: 1 });
+
 module.exports = mongoose.model("Feedback", feedbackSchema);

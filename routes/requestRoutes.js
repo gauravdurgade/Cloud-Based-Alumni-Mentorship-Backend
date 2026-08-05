@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const validate = require("../middleware/validate");
+const requestValidation = require("../validations/request.validation");
 
 /**
  * @swagger
@@ -10,7 +12,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/requests:
+ * /api/v1/requests:
  *   post:
  *     summary: Create a mentorship request
  *     tags: [Mentorship Requests]
@@ -42,7 +44,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/requests/{id}/status:
+ * /api/v1/requests/{id}/status:
  *   patch:
  *     summary: Update request status
  *     tags: [Mentorship Requests]
@@ -83,13 +85,13 @@ const { protect, authorize } = require("../middleware/authMiddleware");
 router.use(protect);
 
 // Student routes
-router.post("/", authorize("student"), createRequest);
+router.post("/", authorize("student"), validate(requestValidation.createRequest), createRequest);
 router.get("/my", authorize("student"), getMyRequests);
 
 // Alumni routes
 router.get("/received", authorize("alumni"), getReceivedRequests);
-router.patch("/:id/accept", authorize("alumni"), acceptRequest);
-router.patch("/:id/reject", authorize("alumni"), rejectRequest);
-router.patch("/:id/complete", authorize("alumni"), completeRequest);
+router.patch("/:id/accept", authorize("alumni"), validate(requestValidation.acceptRequest), acceptRequest);
+router.patch("/:id/reject", authorize("alumni"), validate(requestValidation.rejectRequest), rejectRequest);
+router.patch("/:id/complete", authorize("alumni"), validate(requestValidation.completeRequest), completeRequest);
 
 module.exports = router;

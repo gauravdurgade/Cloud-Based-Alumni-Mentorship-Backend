@@ -1,4 +1,7 @@
 const express = require("express");
+const router = express.Router();
+const validate = require("../middleware/validate");
+const notificationValidation = require("../validations/notification.validation");
 
 /**
  * @swagger
@@ -9,7 +12,7 @@ const express = require("express");
 
 /**
  * @swagger
- * /api/notifications:
+ * /api/v1/notifications:
  *   get:
  *     summary: Get all notifications
  *     tags: [Notifications]
@@ -22,7 +25,7 @@ const express = require("express");
 
 /**
  * @swagger
- * /api/notifications/{id}/read:
+ * /api/v1/notifications/{id}/read:
  *   patch:
  *     summary: Mark notification as read
  *     tags: [Notifications]
@@ -41,7 +44,7 @@ const express = require("express");
 
 /**
  * @swagger
- * /api/notifications/read-all:
+ * /api/v1/notifications/read-all:
  *   patch:
  *     summary: Mark all notifications as read
  *     tags: [Notifications]
@@ -51,7 +54,6 @@ const express = require("express");
  *       200:
  *         description: All notifications marked as read
  */
-const router = express.Router();
 const {
     getNotifications,
     getUnreadCount,
@@ -64,10 +66,10 @@ const { protect } = require("../middleware/authMiddleware");
 // All routes require authentication
 router.use(protect);
 
-router.get("/", getNotifications);
+router.get("/", validate(notificationValidation.getNotifications), getNotifications);
 router.get("/unread-count", getUnreadCount);
 router.patch("/read-all", markAllAsRead); // Must be before /:id/read
-router.patch("/:id/read", markAsRead);
-router.delete("/:id", deleteNotification);
+router.patch("/:id/read", validate(notificationValidation.byId), markAsRead);
+router.delete("/:id", validate(notificationValidation.byId), deleteNotification);
 
 module.exports = router;

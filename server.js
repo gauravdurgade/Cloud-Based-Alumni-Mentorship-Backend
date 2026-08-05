@@ -6,7 +6,10 @@ const morgan = require("morgan");
 const hpp = require("hpp");
 const mongoose = require("mongoose");
 const packageJson = require("./package.json");
-require("dotenv").config();
+
+// Environment & Logger Validation
+const env = require("./config/env");
+const logger = require("./config/logger");
 
 const connectDB = require("./config/db");
 
@@ -40,10 +43,12 @@ app.set("trust proxy", 1);
 // 1. Request ID Generation
 app.use(requestId);
 
-// 2. Logging
-// Skip logging for health checks to prevent log bloat
+// 2. Logging via Winston
 const skipHealth = (req) => req.originalUrl === "/health";
-app.use(morgan(process.env.NODE_ENV === "production" ? "combined" : "dev", { skip: skipHealth }));
+app.use(morgan(env.NODE_ENV === "production" ? "combined" : "dev", { 
+    skip: skipHealth,
+    stream: { write: message => logger.http(message.trim()) }
+}));
 
 // 3. Security Headers
 app.use(helmet());
@@ -51,7 +56,7 @@ app.disable("x-powered-by");
 
 // 4. CORS
 const corsOptions = {
-    origin: process.env.CLIENT_URL ? process.env.CLIENT_URL.split(",") : "*",
+    origin: env.CLIENT_URL ? env.CLIENT_URL.split(",") : "*",
     optionsSuccessStatus: 200
 };
 app.use(cors(corsOptions));
@@ -61,7 +66,7 @@ app.use(express.json());
 app.use(hpp()); // Prevent HTTP Parameter Pollution
 app.use(compression()); // Gzip compression
 
-// Swagger Endpoints (Must be mounted before rate limiting if we want heavy dev usage, but we'll mount after compression)
+// Swagger Endpoints
 app.get("/api/docs.json", (req, res) => {
     res.setHeader("Content-Type", "application/json");
     res.send(swaggerSpec);
@@ -71,18 +76,26 @@ app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customSiteT
 // 6. Global Rate Limiter
 app.use(generalLimiter);
 
-// 7. Mount Routes
-// Apply stricter rate limit exclusively to auth routes
-app.use("/api/auth", authLimiter, authRoutes);
+// 7. Mount API Routes
+const mountRoutes = (prefix) => {
+    // Apply stricter rate limit exclusively to auth routes
+    app.use(`${prefix}/auth`, authLimiter, authRoutes);
+    
+    app.use(`${prefix}/student`, studentRoutes);
+    app.use(`${prefix}/alumni`, alumniRoutes);
+    app.use(`${prefix}/admin`, adminRoutes);
+    app.use(`${prefix}/requests`, requestRoutes);
+    app.use(`${prefix}/meetings`, meetingRoutes);
+    app.use(`${prefix}/feedback`, feedbackRoutes);
+    app.use(`${prefix}/notifications`, notificationRoutes);
+    app.use(`${prefix}/dashboard`, dashboardRoutes);
+};
 
-app.use("/api/student", studentRoutes);
-app.use("/api/alumni", alumniRoutes);
-app.use("/api/admin", adminRoutes);
-app.use("/api/requests", requestRoutes);
-app.use("/api/meetings", meetingRoutes);
-app.use("/api/feedback", feedbackRoutes);
-app.use("/api/notifications", notificationRoutes);
-app.use("/api/dashboard", dashboardRoutes);
+// Mount new v1 version
+mountRoutes("/api/v1");
+
+// Mount legacy version for strict backward compatibility
+mountRoutes("/api");
 
 /**
  * @swagger
@@ -109,7 +122,7 @@ app.get("/health", (req, res) => {
     status: "ok",
     database: dbStatus,
     uptime: process.uptime(),
-    environment: process.env.NODE_ENV || "development",
+    environment: env.NODE_ENV,
     version: packageJson.version || "1.0.0",
     timestamp: new Date().toISOString()
   });
@@ -128,8 +141,27 @@ app.use(notFound);
 app.use(errorHandler);
 
 // Server
-const PORT = process.env.PORT || 5000;
+const PORT = env.PORT;
 
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+const server = app.listen(PORT, () => {
+  logger.info(`🚀 Server running on http://localhost:${PORT}`);
 });
+
+// Graceful Shutdown Handler
+const shutdown = () => {
+  logger.info("SIGTERM/SIGINT signal received: closing HTTP server");
+  server.close(async () => {
+    logger.info("HTTP server closed");
+    try {
+      await mongoose.connection.close(false);
+      logger.info("MongoDB connection closed gracefully");
+      process.exit(0);
+    } catch (err) {
+      logger.error(`Error during MongoDB graceful shutdown: ${err.message}`);
+      process.exit(1);
+    }
+  });
+};
+
+process.on("SIGTERM", shutdown);
+process.on("SIGINT", shutdown);

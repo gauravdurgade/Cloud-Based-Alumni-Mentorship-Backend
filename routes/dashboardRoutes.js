@@ -10,7 +10,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/dashboard/student:
+ * /api/v1/dashboard/student:
  *   get:
  *     summary: Get student dashboard data
  *     tags: [Dashboard]
@@ -23,7 +23,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/dashboard/alumni:
+ * /api/v1/dashboard/alumni:
  *   get:
  *     summary: Get alumni dashboard data
  *     tags: [Dashboard]
@@ -36,7 +36,7 @@ const router = express.Router();
 
 /**
  * @swagger
- * /api/dashboard/admin:
+ * /api/v1/dashboard/admin:
  *   get:
  *     summary: Get admin platform statistics
  *     tags: [Dashboard]
